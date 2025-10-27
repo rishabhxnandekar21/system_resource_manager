@@ -4,58 +4,63 @@
 # by Rishabh Nandekar (23BIT054) and Krish Shah (23BIT282D)
 # --------------------------------------------------------------------
 
-#setting up the directory
-CLEAN_DIR="$HOME/Downloads"
-
-#Hiding unnecessary GTK warnings
+# Hiding unnecessary GTK warnings
 exec 2>/dev/null
 
-#getting cpu information from the system
+# -------------------- System Information Functions --------------------
+
+# Get CPU usage (%)
 get_cpu() {
     top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}'
 }
 
-#getting ram information from the system
+# Get RAM usage (%)
 get_ram() {
     free | awk '/Mem/{printf "%.2f", $3/$2*100}'
 }
 
-#getting disk information from the system
+# Get Disk usage (%)
 get_disk() {
     df / | awk 'NR==2 {print $5}' | sed 's/%//'
 }
 
+# Calculate overall system health
 calculate_health() {
     echo "100 - (0.4*$CPU + 0.3*$RAM + 0.3*$DISK)" | bc -l
 }
 
-#Collecting system stats
+# -------------------- Collect and Display System Stats --------------------
+
 CPU=$(get_cpu)
 RAM=$(get_ram)
 DISK=$(get_disk)
 SCORE=$(calculate_health)
 SCORE=$(printf "%.2f" "$SCORE")
 
-#Display the main system stats on GUI
 zenity --info --title="🧠 System Resource Report" \
 --text="📊 CPU Usage: $CPU%\n🧠 RAM Usage: $RAM%\n💾 Disk Usage: $DISK%\n\n🩺 Health Score: $SCORE / 100" \
 --width=300
 
-# allowing user to change the directory
-if zenity --question --text="Do you want to choose a custom folder for junk cleanup?"; then
-    NEW_DIR=$(zenity --file-selection --directory --title="Select Directory for Junk Cleanup")
-    if [ -n "$NEW_DIR" ]; then
-        CLEAN_DIR="$NEW_DIR"
-        zenity --info --text="📁 Cleanup directory changed to: $CLEAN_DIR"
-    else
-        zenity --info --text="⚠️ No directory selected. Using default: $CLEAN_DIR"
-    fi
+# -------------------- Ask if user wants to clean junk --------------------
+if ! zenity --question --title="🧹 Junk Cleaner" --text="Do you want to scan and clean junk files?"; then
+    zenity --info --text="👋 Exiting System Resource Manager.\nNo cleanup performed."
+    exit 0
 fi
 
-#Asking before cleaning the junk
+# -------------------- Ask User to Select Cleanup Directory --------------------
+CLEAN_DIR=$(zenity --file-selection --directory --title="Select Directory for Junk Cleanup")
+
+if [ -z "$CLEAN_DIR" ]; then
+    zenity --error --text="❌ No directory selected. Exiting the program."
+    exit 1
+else
+    zenity --info --text="📁 Selected cleanup directory: $CLEAN_DIR"
+fi
+
+# -------------------- Junk Cleanup Section --------------------
 if zenity --question --text="Do you want to view junk files before cleaning?"; then
 
-    # Progress bar simulation for scanning
+    # Simulated scanning progress bar
     (
         TOTAL=5
         for i in $(seq 1 $TOTAL); do
@@ -79,14 +84,13 @@ if zenity --question --text="Do you want to view junk files before cleaning?"; t
         zenity --text-info --title="🗑️ Junk Files Found" --width=600 --height=400 --filename=<(echo "$JUNK_LIST")
 
         # Confirm deletion
-        if zenity --question --text="Delete these junk files?"; then
+        if zenity --question --text="🧹 Do you want to delete these junk files?"; then
             echo "$JUNK_LIST" | xargs rm -f
-            zenity --info --text="🧹 Junk files deleted successfully!"
+            zenity --info --text="✨ Junk files deleted successfully!"
         else
             zenity --info --text="❌ Cleanup canceled."
         fi
     fi
 else
-    zenity --info --text="Junk cleanup skipped."
+    zenity --info --text="🛑 Junk cleanup skipped."
 fi
-
