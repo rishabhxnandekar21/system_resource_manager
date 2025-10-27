@@ -4,64 +4,44 @@
 # by Rishabh Nandekar (23BIT054) and Krish Shah (23BIT282D)
 # --------------------------------------------------------------------
 
-# 🔧 Default cleanup directory (user can change it later)
+#setting up the directory
 CLEAN_DIR="$HOME/Downloads"
 
-# 🚫 Hide unnecessary GTK warnings for a cleaner UI
+#Hiding unnecessary GTK warnings
 exec 2>/dev/null
 
-# --------------------------------------------------------------------
-# 🧠 Function: get_cpu
-# Purpose: Fetches CPU usage percentage using 'top' command
-# --------------------------------------------------------------------
+#getting cpu information from the system
 get_cpu() {
     top -bn1 | grep "Cpu(s)" | awk '{print 100 - $8}'
 }
 
-# --------------------------------------------------------------------
-# 🧠 Function: get_ram
-# Purpose: Calculates RAM usage percentage using 'free' command
-# --------------------------------------------------------------------
+#getting ram information from the system
 get_ram() {
     free | awk '/Mem/{printf "%.2f", $3/$2*100}'
 }
 
-# --------------------------------------------------------------------
-# 💾 Function: get_disk
-# Purpose: Retrieves Disk usage percentage using 'df'
-# --------------------------------------------------------------------
+#getting disk information from the system
 get_disk() {
     df / | awk 'NR==2 {print $5}' | sed 's/%//'
 }
 
-# --------------------------------------------------------------------
-# ❤️ Function: calculate_health
-# Purpose: Combines CPU, RAM, and Disk usage into one Health Score
-# Formula: 100 - (0.4*CPU + 0.3*RAM + 0.3*DISK)
-# --------------------------------------------------------------------
 calculate_health() {
     echo "100 - (0.4*$CPU + 0.3*$RAM + 0.3*$DISK)" | bc -l
 }
 
-# --------------------------------------------------------------------
-# 📊 Collecting system stats
-# --------------------------------------------------------------------
+#Collecting system stats
 CPU=$(get_cpu)
 RAM=$(get_ram)
 DISK=$(get_disk)
 SCORE=$(calculate_health)
 SCORE=$(printf "%.2f" "$SCORE")
 
-# --------------------------------------------------------------------
-# 🪟 Display main system resource report via Zenity GUI
-# --------------------------------------------------------------------
+#Display the main system stats on GUI
 zenity --info --title="🧠 System Resource Report" \
 --text="📊 CPU Usage: $CPU%\n🧠 RAM Usage: $RAM%\n💾 Disk Usage: $DISK%\n\n🩺 Health Score: $SCORE / 100" \
 --width=300
 
-# --------------------------------------------------------------------
-# 🗂️ Option: Allow user to change directory for junk cleanup
-# --------------------------------------------------------------------
+# allowing user to change the directory
 if zenity --question --text="Do you want to choose a custom folder for junk cleanup?"; then
     NEW_DIR=$(zenity --file-selection --directory --title="Select Directory for Junk Cleanup")
     if [ -n "$NEW_DIR" ]; then
@@ -72,9 +52,7 @@ if zenity --question --text="Do you want to choose a custom folder for junk clea
     fi
 fi
 
-# --------------------------------------------------------------------
-# 🧹 Ask user before scanning junk
-# --------------------------------------------------------------------
+#Asking before cleaning the junk
 if zenity --question --text="Do you want to view junk files before cleaning?"; then
 
     # Progress bar simulation for scanning
