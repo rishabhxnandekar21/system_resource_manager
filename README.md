@@ -2,7 +2,7 @@
 A shell/base based system resource monitoring tool with Zenity GUI that displays CPU, RAM, and Disk usage , also calculates system health and clear junk files.
 
 # 🧠 System Resource Manager (Linux + Zenity)
-### by Rishabh Nandekar (23BIT054) and Krish Shah (23BIT282D)
+### by Rishabh Nandekar
 
 A **Linux shell script** project with a **Zenity-based GUI** that monitors system resources, calculates system health, and performs junk file cleanup with user interaction.
 
